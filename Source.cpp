@@ -11,6 +11,22 @@
 #include "allegro5/allegro_primitives.h"
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_color.h>
+
+int boardhelp[10][10] , mark[10][10] ;
+int free1 =0 ;
+
+void ini() {
+	for (int i1 = 0; i1 < 10; i1++)
+		for (int i2 = 0; i2 < 10; i2++)
+			boardhelp[i1][i2] = 0;
+}
+
+void inimark() {
+	for (int i1 = 0; i1 < 10; i1++)
+		for (int i2 = 0; i2 < 10; i2++)
+			mark[i1][i2] = 0;
+}
+
 int andis(int i) {
 	if (i == 47)
 		return 0;
@@ -87,6 +103,44 @@ void arayPrint(int a[10][10]) {
 	}
 }
 
+bool check(int i, int j) {
+	if (i < 10 && j < 10 && i >= 0 && j >= 0) return 1;
+	return 0 ;
+}
+
+void dfs(int i , int j , int sw) {
+	int sw2 = 0 ; 
+	mark[i][j] = 1;
+
+	printf("i = %d j = %d \n", i, j);
+	printf("118\n");
+
+	if (check(i + 1, j) && !mark[i+1][j] && boardhelp[i + 1][j] == sw) dfs(i + 1 , j , sw) ;
+	if (check(i - 1, j) && !mark[i-1][j] && boardhelp[i - 1][j] == sw) dfs(i - 1 , j , sw) ;
+	if (check(i, j + 1) && !mark[i][j+1] && boardhelp[i][j + 1] == sw) dfs(i , j + 1 , sw) ;
+	if (check(i, j - 1) && !mark[i][j-1] && boardhelp[i][j - 1] == sw) dfs(i , j - 1 , sw) ;
+
+	if (check(i + 1, j) && !boardhelp[i + 1][j]) sw2 = 1 ;
+	if (check(i - 1, j) && !boardhelp[i - 1][j]) sw2 = 1 ;
+	if (check(i, j + 1) && !boardhelp[i][j + 1]) sw2 = 1 ;
+	if (check(i, j - 1) && !boardhelp[i][j - 1]) sw2 = 1 ;
+
+	printf("sw2 = %d \n" , sw2);
+	if (sw2) free1 = 0 ; 
+}
+
+void dfs2(int i, int j, int sw) {
+	printf("i = %d j = %d \n", i, j);
+	printf("125\n") ;
+	mark[i][j] = 1;
+	boardhelp[i][j] = 0;
+	if (check(i + 1, j) && !mark[i+1][j] && boardhelp[i + 1][j] == sw) boardhelp[i + 1][j] = 0 , dfs2(i + 1, j, sw) ;
+	if (check(i - 1, j) && !mark[i-1][j] && boardhelp[i - 1][j] == sw) boardhelp[i - 1][j] = 0 , dfs2(i - 1, j, sw) ;
+	if (check(i, j + 1) && !mark[i][j+1] && boardhelp[i][j + 1] == sw) boardhelp[i][j + 1] = 0 , dfs2(i, j + 1, sw) ;
+	if (check(i, j - 1) && !mark[i][j-1] && boardhelp[i][j - 1] == sw) boardhelp[i][j - 1] = 0 , dfs2(i, j - 1, sw) ;
+}
+
+
 int main(int argc, char **argv) {
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_BITMAP  *image = NULL;
@@ -98,11 +152,8 @@ int main(int argc, char **argv) {
 	ALLEGRO_BITMAP *player1 = NULL;
 	ALLEGRO_BITMAP *player2 = NULL;
 
-	int boardhelp[10][10];
-	for (int i1=0; i1 < 10; i1++)
-		for (int i2=0; i2 < 10; i2++)
-			boardhelp[i1][i2] = 0;
-
+	ini() ;
+	
 	const int komi = 6.5;
 	char board[9][9];
 	bool redraw = false;
@@ -197,22 +248,101 @@ int main(int argc, char **argv) {
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 			if (ev.mouse.button & 1) {
-				if(checkNobat%2==0){
+				if(checkNobat%2==0) {
 						mouseCursor = al_create_mouse_cursor(player2, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
 						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 20, al_map_rgb(255, 255, 255));
 						boardhelp[andis(setX(ev.mouse.y))][andis(setY(ev.mouse.x))] = 2;
-					checkNobat++;
+					    checkNobat++;
+						int xx = andis(setX(ev.mouse.y)) ;
+						int yy = andis(setY(ev.mouse.x)) ;
+						free1 = 1 ;
+
+						inimark() ;
+						dfs(xx, yy, boardhelp[xx][yy]);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy, 2);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx + 1, yy) && boardhelp[xx + 1][yy]) free1=1 , dfs(xx + 1, yy, boardhelp[xx + 1][yy]);
+						if (free1) {
+							inimark();
+							dfs2(xx+1, yy, boardhelp[xx + 1][yy]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx - 1, yy) && boardhelp[xx - 1][yy]) free1=1 , dfs(xx - 1, yy, boardhelp[xx - 1][yy]);
+						if (free1) {
+							inimark();
+							dfs2(xx-1, yy, boardhelp[xx - 1][yy]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx, yy + 1) && boardhelp[xx][yy + 1]) free1=1 , dfs(xx, yy + 1, boardhelp[xx][yy + 1]);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy+1, boardhelp[xx][yy + 1]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx, yy - 1) && boardhelp[xx][yy - 1]) free1=1 , dfs(xx, yy - 1, boardhelp[xx][yy - 1]);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
+						}
+
 				}
 				else {
 						mouseCursor = al_create_mouse_cursor(player1, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
 						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 20, al_map_rgb(0, 0, 0));
 						boardhelp[andis(setX(ev.mouse.y))][andis(setY(ev.mouse.x))] = 1;
-					checkNobat++;
+						checkNobat++;
+						int xx = andis(setX(ev.mouse.y));
+						int yy = andis(setY(ev.mouse.x));
+						free1 = 1;
+						
+						inimark();
+						dfs(xx, yy, boardhelp[xx][yy]);
+						printf("free1 = %d", free1);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy, 1);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx + 1, yy) && boardhelp[xx + 1][yy]) free1 = 1 , dfs(xx + 1, yy, boardhelp[xx + 1][yy]);
+						if (free1) {
+							inimark();
+							dfs2(xx+1, yy, boardhelp[xx + 1][yy]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx - 1, yy) && boardhelp[xx - 1][yy]) free1 = 1 , dfs(xx - 1, yy, boardhelp[xx - 1][yy]);
+						if (free1) {
+							inimark();
+							dfs2(xx-1, yy, boardhelp[xx - 1][yy]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx, yy + 1) && boardhelp[xx][yy + 1]) free1=1 , dfs(xx, yy + 1, boardhelp[xx][yy + 1]);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy+1, boardhelp[xx][yy + 1]);
+						}
+						free1 = 0;
+						inimark();
+						if (check(xx, yy - 1) && boardhelp[xx][yy - 1]) free1=1 , dfs(xx, yy - 1, boardhelp[xx][yy - 1]);
+						if (free1) {
+							inimark();
+							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
+						}
 				}
 			}
 			arayPrint(boardhelp);
+			printf("\n\n\n\n\n\n");
 			al_flip_display();
 		}
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
