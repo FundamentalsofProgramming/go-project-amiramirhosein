@@ -12,6 +12,12 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_color.h>
 
+
+ALLEGRO_DISPLAY *display = NULL;
+ALLEGRO_EVENT ev;
+ALLEGRO_BITMAP *player1 = NULL;
+ALLEGRO_BITMAP *player2 = NULL;
+
 int boardhelp[10][10] , mark[10][10] ;
 int free1 =0 ;
 
@@ -27,74 +33,113 @@ void inimark() {
 			mark[i1][i2] = 0;
 }
 
-int andis(int i) {
-	if (i == 47)
+int andisY(int j) {
+	if (j == 54)
 		return 0;
-	if (i == 118)
+	if (j == 162)
 		return 1;
-	if (i == 187)
+	if (j == 270)
 		return 2;
-	if (i == 260)
+	if (j == 378)
 		return 3;
-	if (i == 333)
+	if (j == 485)
 		return 4;
-	if (i == 405)
+	if (j == 594)
 		return 5;
-	if (i == 477)
+	if (j == 702)
 		return 6;
-	if (i == 548)
+	if (j == 809)
 		return 7;
-	if (i == 621)
+	if (j == 918)
 		return 8;
-	if (i == 688)
+	if (j == 1025)
 		return 9;
 }
-
+int andisX(int i) {
+	if (i == 701)
+		return 0;
+	if (i == 810 )
+		return 1;
+	if (i == 918 )
+		return 2;
+	if (i == 1026 )
+		return 3;
+	if (i == 1134 )
+		return 4;
+	if (i == 1242 )
+		return 5;
+	if (i == 1350 )
+		return 6;
+	if (i == 1458)
+		return 7;
+	if (i == 1566)
+		return 8;
+	if (i == 1674 )
+		return 9;
+}
 int setX(int x) {
-	if (x > 0 && x < 83)
-		return 47;
-	if (x > 83 && x < 153)
-		return 118;
-	if (x > 153 && x < 224)
-		return 187;
-	if (x > 224 && x < 297)
-		return 260;
-	if (x > 297 && x < 369)
-		return 333;
-	if (x > 369 && x < 441)
-		return 405;
-	if (x > 441 && x < 513)
-		return 477;
-	if (x > 513 && x < 585)
-		return 548;
-	if (x > 585 && x < 655)
-		return 621;
-	if (x > 655 && x < 750)
-		return 688;
+	if (x > 680 && x < 1700 ){
+		if (x > 680 && x < 755)
+			return 701;
+		if (x > 755 && x < 866)
+			return 810;
+		if (x > 866 && x < 973)
+			return 918;
+		if (x > 973 && x < 1080)
+			return 1026;
+		if (x > 1080 && x < 1191)
+			return 1134;
+		if (x > 1191 && x < 1297)
+			return 1242;
+		if (x > 1297 && x < 1407)
+			return 1350;
+		if (x > 1407 && x < 1513)
+			return 1458;
+		if (x > 1513 && x < 1623)
+			return 1566;
+		if (x > 1623 && x < 1700)
+			return 1674;
+	}
+	else {
+		al_show_native_message_box(display, "Error", "Error", "Invalied Position",
+			NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		return -2;
+	}
+	
 }
 int setY(int y) {
-	if (y > 0 && y< 83)
-		return 47;
-	if (y > 83 && y < 153)
-		return 118;
-	if (y > 153 && y < 224)
-		return 187;
-	if (y > 224 && y < 297)
-		return 260;
-	if (y > 297 && y < 369)
-		return 333;
-	if (y > 369 && y < 441)
-		return 405;
-	if (y > 441 && y < 513)
-		return 477;
-	if (y > 513 && y < 585)
-		return 548;
-	if (y > 585 && y < 655)
-		return 621;
-	if (y > 655 && y < 750)
-		return 688;
+	if (y > 36 && y < 1056) {
+		if (y > 36 && y < 107)
+			return 54;
+		if (y > 107 && y < 217)
+			return 162;
+		if (y > 217 && y < 324)
+			return 270;
+		if (y > 324 && y < 433)
+			return 378;
+		if (y > 433 && y < 540)
+			return 485;
+		if (y > 540 && y < 646)
+			return 594;
+		if (y > 646 && y < 756)
+			return 702;
+		if (y > 756 && y < 863)
+			return 809;
+		if (y > 863 && y < 970)
+			return 918;
+		if (y > 970 && y < 1056)
+			return 1025;
+	}
+
+	else {
+		al_show_native_message_box(display, "Error", "Error", "Invalied Position",
+			NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		return -3;
+
+	}
 
 }
+
 void arayPrint(int a[10][10]) {
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++)
@@ -112,8 +157,8 @@ void dfs(int i , int j , int sw) {
 	int sw2 = 0 ; 
 	mark[i][j] = 1;
 
-	printf("i = %d j = %d \n", i, j);
-	printf("118\n");
+//	printf("i = %d j = %d \n", i, j);
+//	printf("118\n");
 
 	if (check(i + 1, j) && !mark[i+1][j] && boardhelp[i + 1][j] == sw) dfs(i + 1 , j , sw) ;
 	if (check(i - 1, j) && !mark[i-1][j] && boardhelp[i - 1][j] == sw) dfs(i - 1 , j , sw) ;
@@ -125,13 +170,13 @@ void dfs(int i , int j , int sw) {
 	if (check(i, j + 1) && !boardhelp[i][j + 1]) sw2 = 1 ;
 	if (check(i, j - 1) && !boardhelp[i][j - 1]) sw2 = 1 ;
 
-	printf("sw2 = %d \n" , sw2);
+//	printf("sw2 = %d \n" , sw2);
 	if (sw2) free1 = 0 ; 
 }
 
 void dfs2(int i, int j, int sw) {
-	printf("i = %d j = %d \n", i, j);
-	printf("125\n") ;
+//	printf("i = %d j = %d \n", i, j);
+//	printf("125\n") ;
 	mark[i][j] = 1;
 	boardhelp[i][j] = 0;
 	if (check(i + 1, j) && !mark[i+1][j] && boardhelp[i + 1][j] == sw) boardhelp[i + 1][j] = 0 , dfs2(i + 1, j, sw) ;
@@ -140,22 +185,30 @@ void dfs2(int i, int j, int sw) {
 	if (check(i, j - 1) && !mark[i][j-1] && boardhelp[i][j - 1] == sw) boardhelp[i][j - 1] = 0 , dfs2(i, j - 1, sw) ;
 }
 
+bool alowStone() {
+	if (setX(ev.mouse.x)!= -2 && setY(ev.mouse.y)!= -3)
+		return true;
+
+
+
+	return false;
+}
+
 
 int main(int argc, char **argv) {
-	ALLEGRO_DISPLAY *display = NULL;
+	
 	ALLEGRO_BITMAP  *image = NULL;
 	ALLEGRO_DISPLAY_MODE   disp_data;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_BITMAP *bouncer = NULL;
 	ALLEGRO_MOUSE_CURSOR *mouseCursor = NULL;
 	//	ALLEGRO_TIMER *timer = al_create_timer(1.0/FPS);
-	ALLEGRO_BITMAP *player1 = NULL;
-	ALLEGRO_BITMAP *player2 = NULL;
+	
 
 	ini() ;
 	
 	const int komi = 6.5;
-	char board[9][9];
+//	char board[9][9];
 	bool redraw = false;
 	bool doexit = false;
 	int checkNobat = 1;
@@ -180,10 +233,10 @@ int main(int argc, char **argv) {
 	}
 	al_install_mouse();
 
-	/*al_get_display_mode(al_get_num_display_modes() - 1, &disp_data);
-	al_set_new_display_flags(ALLEGRO_FULLSCREEN);*/
-	display = al_create_display(750, 750);
-	al_clear_to_color(al_map_rgb(192, 192, 192));
+	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data);
+	//al_set_new_display_flags(ALLEGRO_FULLSCREEN);
+	display = al_create_display(disp_data.width, disp_data.height);
+	al_clear_to_color(al_map_rgb(255,203,98));
 	if (!display) {
 		fprintf(stderr, "failed to create display!\n");
 		return -1;
@@ -196,7 +249,7 @@ int main(int argc, char **argv) {
 	}
 
 
-	image = al_load_bitmap("1.jpg");
+	image = al_load_bitmap("mainIMG.jpg");
 	if (!image) {
 		al_show_native_message_box(display, "Error", "Error", "Failed to load image!",
 			NULL, ALLEGRO_MESSAGEBOX_ERROR);
@@ -229,13 +282,13 @@ int main(int argc, char **argv) {
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
-	al_draw_bitmap(image, 45,45,0);
+	al_draw_bitmap(image, 0,0,0);
 	al_flip_display();
 
-	
+
 
 	while (!doexit) {        //MAIN GAME LOOP
-		ALLEGRO_EVENT ev;
+		
 		al_wait_for_event(event_queue, &ev);
 		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 			doexit = true;
@@ -249,13 +302,16 @@ int main(int argc, char **argv) {
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 			if (ev.mouse.button & 1) {
 				if(checkNobat%2==0) {
+					if (alowStone()) {
 						mouseCursor = al_create_mouse_cursor(player2, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
-						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 20, al_map_rgb(255, 255, 255));
-						boardhelp[andis(setX(ev.mouse.y))][andis(setY(ev.mouse.x))] = 2;
-					    checkNobat++;
-						int xx = andis(setX(ev.mouse.y)) ;
-						int yy = andis(setY(ev.mouse.x)) ;
+						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 30, al_map_rgb(255, 255, 255));
+							boardhelp[andisY(setY(ev.mouse.y))][andisX(setX(ev.mouse.x))] = 2;
+						checkNobat++;
+						//printf("%f  %f \n", setX(ev.mouse.x), setY(ev.mouse.y));
+						//printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
+						int yy = andisX(setX(ev.mouse.x)) ;
+						int xx = andisY(setY(ev.mouse.y)) ;
 						free1 = 1 ;
 
 						inimark() ;
@@ -292,21 +348,29 @@ int main(int argc, char **argv) {
 							inimark();
 							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
 						}
+					}
+					else {
+						al_show_native_message_box(display, "Error", "Error", "Move Is invalied!",
+							NULL, ALLEGRO_MESSAGEBOX_ERROR);
+					}
 
 				}
 				else {
+					if (alowStone()) {
 						mouseCursor = al_create_mouse_cursor(player1, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
-						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 20, al_map_rgb(0, 0, 0));
-						boardhelp[andis(setX(ev.mouse.y))][andis(setY(ev.mouse.x))] = 1;
+						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 30, al_map_rgb(0, 0, 0));
+						boardhelp[andisY(setY(ev.mouse.y))][andisX(setX(ev.mouse.x))] = 1;
 						checkNobat++;
-						int xx = andis(setX(ev.mouse.y));
-						int yy = andis(setY(ev.mouse.x));
+						printf("%d  %d \n", setX(ev.mouse.x), setY(ev.mouse.y));
+						//printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
+						int yy = andisX(setX(ev.mouse.x));
+						int xx = andisY(setY(ev.mouse.y));
 						free1 = 1;
-						
+
 						inimark();
 						dfs(xx, yy, boardhelp[xx][yy]);
-						printf("free1 = %d", free1);
+					//	printf("free1 = %d", free1);
 						if (free1) {
 							inimark();
 							dfs2(xx, yy, 1);
@@ -339,6 +403,11 @@ int main(int argc, char **argv) {
 							inimark();
 							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
 						}
+					}
+					else {
+						al_show_native_message_box(display, "Error", "Error", "Move Is invalied!",
+							NULL, ALLEGRO_MESSAGEBOX_ERROR);
+					}
 				}
 			}
 			arayPrint(boardhelp);
