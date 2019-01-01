@@ -17,7 +17,7 @@ ALLEGRO_DISPLAY *display = NULL;
 ALLEGRO_EVENT ev;
 ALLEGRO_BITMAP *player1 = NULL;
 ALLEGRO_BITMAP *player2 = NULL;
-
+ALLEGRO_BITMAP  *image = NULL;
 int boardhelp[10][10] , mark[10][10] ;
 int free1 =0 ;
 
@@ -27,11 +27,15 @@ void ini() {
 			boardhelp[i1][i2] = 0;
 }
 
-void inimark() {
-	for (int i1 = 0; i1 < 10; i1++)
-		for (int i2 = 0; i2 < 10; i2++)
-			mark[i1][i2] = 0;
+void arayPrint(int a[10][10]) {
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++)
+			printf("%d ", a[i][j]);
+		printf("\n");
+	}
 }
+
+
 
 int andisY(int j) {
 	if (j == 54)
@@ -140,12 +144,19 @@ int setY(int y) {
 
 }
 
-void arayPrint(int a[10][10]) {
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++)
-			printf("%d ", a[i][j]);
-		printf("\n");
-	}
+bool alowStone() {
+	if (setX(ev.mouse.x) != -2 && setY(ev.mouse.y) != -3)
+		return true;
+
+
+
+	return false;
+}
+
+void inimark() {
+	for (int i1 = 0; i1 < 10; i1++)
+		for (int i2 = 0; i2 < 10; i2++)
+			mark[i1][i2] = 0;
 }
 
 bool check(int i, int j) {
@@ -185,19 +196,37 @@ void dfs2(int i, int j, int sw) {
 	if (check(i, j - 1) && !mark[i][j-1] && boardhelp[i][j - 1] == sw) boardhelp[i][j - 1] = 0 , dfs2(i, j - 1, sw) ;
 }
 
-bool alowStone() {
-	if (setX(ev.mouse.x)!= -2 && setY(ev.mouse.y)!= -3)
-		return true;
+/*
+void refresh() {
+	
+	al_draw_bitmap(image, 0, 0, 0);
+	al_flip_display();
 
+}*/
 
-
-	return false;
+void refresh() {
+	int pixcelX[10] = { 701,810,918,1026,1134,1242,1350,1458,1566,1674 };
+	int pixcelY[10] = { 54,162,270,378,485,594,702,809,918,1025 };
+	al_init_primitives_addon();
+	image = al_load_bitmap("mainIMG.jpg");
+	al_draw_bitmap(image, 0, 0, 0);
+	al_flip_display();
+	for (int i3 = 0; i3 < 10; i3++) {
+		for (int j3 = 0; j3 < 10; j3++) {
+			if (boardhelp[i3][j3] == 1) {
+				al_draw_filled_circle(pixcelX[j3], pixcelY[i3], 30, al_map_rgb(0, 0, 0));
+			}
+			else if(boardhelp[i3][j3] == 2){
+				al_draw_filled_circle(pixcelX[j3], pixcelY[i3], 30, al_map_rgb(255, 255, 255));
+			}
+		}
+	}
 }
 
 
 int main(int argc, char **argv) {
 	
-	ALLEGRO_BITMAP  *image = NULL;
+	
 	ALLEGRO_DISPLAY_MODE   disp_data;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_BITMAP *bouncer = NULL;
@@ -248,7 +277,6 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-
 	image = al_load_bitmap("mainIMG.jpg");
 	if (!image) {
 		al_show_native_message_box(display, "Error", "Error", "Failed to load image!",
@@ -285,7 +313,7 @@ int main(int argc, char **argv) {
 	al_draw_bitmap(image, 0,0,0);
 	al_flip_display();
 
-
+	
 
 	while (!doexit) {        //MAIN GAME LOOP
 		
@@ -306,19 +334,20 @@ int main(int argc, char **argv) {
 						mouseCursor = al_create_mouse_cursor(player2, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
 						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 30, al_map_rgb(255, 255, 255));
+						printf("%d  %d \n", setX(ev.mouse.x), setY(ev.mouse.y));
+						printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
 							boardhelp[andisY(setY(ev.mouse.y))][andisX(setX(ev.mouse.x))] = 2;
 						checkNobat++;
-						//printf("%f  %f \n", setX(ev.mouse.x), setY(ev.mouse.y));
-						//printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
+						
 						int yy = andisX(setX(ev.mouse.x)) ;
 						int xx = andisY(setY(ev.mouse.y)) ;
 						free1 = 1 ;
-
 						inimark() ;
 						dfs(xx, yy, boardhelp[xx][yy]);
 						if (free1) {
 							inimark();
 							dfs2(xx, yy, 2);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -326,6 +355,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx+1, yy, boardhelp[xx + 1][yy]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -333,6 +363,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx-1, yy, boardhelp[xx - 1][yy]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -340,6 +371,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx, yy+1, boardhelp[xx][yy + 1]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -347,6 +379,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
+							refresh();
 						}
 					}
 					else {
@@ -360,10 +393,11 @@ int main(int argc, char **argv) {
 						mouseCursor = al_create_mouse_cursor(player1, 15, 15);
 						al_set_mouse_cursor(display, mouseCursor);
 						al_draw_filled_circle(setX(ev.mouse.x), setY(ev.mouse.y), 30, al_map_rgb(0, 0, 0));
+						printf("%d  %d \n", setX(ev.mouse.x), setY(ev.mouse.y));
+						printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
 						boardhelp[andisY(setY(ev.mouse.y))][andisX(setX(ev.mouse.x))] = 1;
 						checkNobat++;
-						printf("%d  %d \n", setX(ev.mouse.x), setY(ev.mouse.y));
-						//printf("%d  %d \n", andisY(setY(ev.mouse.y)), andisX(setX(ev.mouse.x)));
+						
 						int yy = andisX(setX(ev.mouse.x));
 						int xx = andisY(setY(ev.mouse.y));
 						free1 = 1;
@@ -374,6 +408,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx, yy, 1);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -381,6 +416,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx+1, yy, boardhelp[xx + 1][yy]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -388,6 +424,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx-1, yy, boardhelp[xx - 1][yy]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -395,6 +432,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx, yy+1, boardhelp[xx][yy + 1]);
+							refresh();
 						}
 						free1 = 0;
 						inimark();
@@ -402,6 +440,7 @@ int main(int argc, char **argv) {
 						if (free1) {
 							inimark();
 							dfs2(xx, yy-1, boardhelp[xx][yy - 1]);
+							refresh();
 						}
 					}
 					else {
